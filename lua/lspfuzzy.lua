@@ -62,6 +62,9 @@ local function jump(entries)
     cmd 'wincmd p'
   end
   lsp.util.jump_to_location(locations[1])
+
+  vim.api.nvim_command("normal! zz")
+  vim.api.nvim_command("call vista#util#Blink(3, 100)")
 end
 
 local function apply_action(entries)
