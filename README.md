@@ -61,6 +61,7 @@ with their default settings:
 ```lua
 require('lspfuzzy').setup {
   methods = 'all',         -- either 'all' or a list of LSP methods (see below)
+  jump_one = true,         -- jump immediately if there is only one location
   fzf_preview = {          -- arguments to the FZF '--preview-window' option
     'right:+{2}-/2'          -- preview on the right and centered on entry
   },
@@ -100,12 +101,9 @@ workspace/symbol
 ```
 
 ## Troubleshooting
-
 #### Preview does not work
 You need to install [fzf.vim](https://github.com/junegunn/fzf.vim) to enable
-previews. If it's already installed, make sure it's up-to-date. The plugin
-checks that `g:loaded_fzf_vim` is set, which was introduced
-[in this commit](https://github.com/junegunn/fzf.vim/commit/636a62f140181f80c8e7460a76ae6a5d2c5d97b2).
+previews. If it's already installed, make sure it's up-to-date.
 
 #### Preview does not scroll to the selected location
 Try to append `+{2}-/2` to either `g:fzf_preview_window` or to the `fzf_preview`
@@ -115,8 +113,8 @@ vim.g.fzf_preview_window = {'down:+{2}-/2'}
 ```
 
 #### Using the `fzf_modifier` option breaks the plugin
-The plugin uses the filename embedded in the FZF entry selected by the user to
-jump to the correct location. Therefore it must resolve to a valid path. For
+The plugin uses the filename embedded in the FZF entry currently selected to
+jump to the correct location. Therefore it must resolve to a valid path: for
 instance `:.` or `:p` can be used but not `:t`.
 
 ## License
