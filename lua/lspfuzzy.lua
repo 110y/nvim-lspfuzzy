@@ -65,7 +65,8 @@ local function fzf_to_lsp(entry)
 end
 
 local function jump_to_location(location)
-  vim.lsp.util.jump_to_location(location, offset_encoding)
+  -- vim.lsp.util.jump_to_location(location, offset_encoding)
+  vim.lsp.util.show_document(location, offset_encoding, { reuse_win = nil, focus = true })
   if type(opts.callback) == 'function' then
     opts.callback()
   end
@@ -107,12 +108,13 @@ local function jump(entries)
 end
 
 local function build_fzf_opts(label, preview, multi)
-  local prompt = fmt('%s> ', label)
+  -- local prompt = fmt('%s> ', label)
   local fzf_opts = {
     '--ansi',
+    '--no-scrollbar',
     '--delimiter', ':',
     '--keep-right',
-    '--prompt', prompt,
+    '--prompt', '> ',
   }
 
   -- Enable FZF actions
@@ -172,6 +174,16 @@ local function location_handler(label, result)
     result = vim.tbl_islist(result) and result or {result}
   end
 
+  if label == 'Implementations' then
+    local res = {}
+    for _, item in ipairs(result) do
+      if item.range.start.line ~= vim.fn.line('.') - 1 then
+        table.insert(res, item)
+      end
+    end
+    result = res
+  end
+
   if opts.jump_one and #result == 1 then
     return jump_to_location(result[1])
   end
@@ -185,9 +197,14 @@ local function make_call_hierarchy_handler(direction)
   return function(label, result)
     local items = {}
 
+    local res = {}
     for _, call_hierarchy_call in pairs(result) do
       local call_hierarchy_item = call_hierarchy_call[direction]
       for _, range in pairs(call_hierarchy_call.fromRanges) do
+        table.insert(res, {
+          range =  range,
+          uri = call_hierarchy_item.uri,
+        })
         table.insert(items, {
           filename = vim.uri_to_fname(call_hierarchy_item.uri),
           text = call_hierarchy_item.name,
@@ -195,6 +212,10 @@ local function make_call_hierarchy_handler(direction)
           col = range.start.character + 1,
         })
       end
+    end
+
+    if opts.jump_one and #res== 1 then
+      return jump_to_location(res[1])
     end
 
     local source = vim.tbl_map(lsp_to_fzf, items)
@@ -267,8 +288,9 @@ local function wrap_handler(handler)
     end
 
     -- Save offset encoding
-    local client = vim.lsp.get_client_by_id(ctx.client_id)
-    offset_encoding = client and client.offset_encoding or 'utf-16'
+    -- local client = vim.lsp.get_client_by_id(ctx.client_id)
+    -- offset_encoding = client and client.offset_encoding or 'utf-16'
+    offset_encoding = 'utf-16'
 
     return handler.target(handler.label, result, ctx, config)
   end
@@ -325,4 +347,6 @@ return {
     last_results_cmd()
   end,
   setup = setup,
+  location_handler = location_handler,
+  wrap_handler = wrap_handler,
 }
