@@ -348,5 +348,6 @@ return {
   end,
   setup = setup,
   location_handler = location_handler,
+  symbol_handler = symbol_handler,
   wrap_handler = wrap_handler,
 }
