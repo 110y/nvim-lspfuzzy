@@ -48,14 +48,18 @@ end
 
 local function lsp_to_fzf(item)
   local filename = vim.fn.fnamemodify(item.filename, opts.fzf_modifier)
-  local path = fmt('%s%s%s', ansi.purple, filename, ansi.reset)
-  local lnum = fmt('%s%s%s', ansi.green, item.lnum, ansi.reset)
-  local text = opts.fzf_trim and vim.trim(item.text) or item.text
-  return fmt('%s:%s:%s: %s', path, lnum, item.col, text)
+  -- local path = fmt('%s%s%s', ansi.purple, filename, ansi.reset)
+  -- local lnum = fmt('%s%s%s', ansi.green, item.lnum, ansi.reset)
+  -- local text = opts.fzf_trim and vim.trim(item.text) or item.text
+  local path = filename
+  local lnum = item.lnum
+  local text = item.text:sub(item.text:find(']', 1, true) + 1):gsub('^%s+', '')
+
+  return fmt('%s\t%s\t%s\t%s\t%s', path, lnum, item.col, text, item.kind)
 end
 
 local function fzf_to_lsp(entry)
-  local split = vim.split(entry, ':')
+  local split = vim.split(entry, '\t')
   local uri = vim.uri_from_fname(vim.fn.fnamemodify(split[1], ':p'))
   local line = tonumber(split[2]) - 1
   local column = tonumber(split[3]) - 1
@@ -128,6 +132,14 @@ local function build_fzf_opts(label, preview, multi)
   if preview and opts.fzf_preview and vim.g.loaded_fzf_vim then
     local args = vim.fn['fzf#vim#with_preview'](unpack(opts.fzf_preview)).options
     vim.list_extend(fzf_opts, args)
+    vim.list_extend(fzf_opts, {
+      '-n', '1',
+      '--with-nth', '4,5',
+      '--delimiter', '\t',
+      '--preview', '$HOME/.vim/plugged/fzf.vim/bin/preview.sh {1}:{2}:{3}',
+      '--preview-window', "up:50%:+{2}-5:noborder",
+      '--ansi',
+    })
   end
 
   -- Enable multi-selection
