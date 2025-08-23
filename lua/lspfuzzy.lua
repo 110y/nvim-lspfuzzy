@@ -186,7 +186,27 @@ end
 -------------------- LSP HANDLERS --------------------------
 local function symbol_handler(label, result, ctx)
   local items = vim.lsp.util.symbols_to_items(result, ctx.bufnr)
-  local source = vim.tbl_map(lsp_to_fzf, items)
+
+  local max_name_width = 0
+  for _, item in ipairs(items) do
+    local text = item.text:sub(item.text:find(']', 1, true) + 1):gsub('^%s+', '')
+    local symbol_name = text:match('^([^%s]+)') or text
+    max_name_width = math.max(max_name_width, #symbol_name)
+  end
+
+  local function symbol_to_fzf(item)
+    local filename = vim.fn.fnamemodify(item.filename, opts.fzf_modifier)
+    local path = filename
+    local lnum = item.lnum
+    local text = item.text:sub(item.text:find(']', 1, true) + 1):gsub('^%s+', '')
+
+    local symbol_name = text:match('^([^%s]+)') or text
+    local padded_text = string.format('%-' .. max_name_width .. 's', symbol_name)
+
+    return fmt('%s\t%s\t%s\t%s\t%s', path, lnum, item.col, padded_text, item.kind or '')
+  end
+
+  local source = vim.tbl_map(symbol_to_fzf, items)
   fzf(source, label, jump, true, true)
 end
 
