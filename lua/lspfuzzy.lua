@@ -132,9 +132,20 @@ local function build_fzf_opts(label, preview, multi)
   if preview and opts.fzf_preview and vim.g.loaded_fzf_vim then
     local args = vim.fn['fzf#vim#with_preview'](unpack(opts.fzf_preview)).options
     vim.list_extend(fzf_opts, args)
+
+    local nth = '1,2,3,4,5'
+
+    if label == 'References' then
+      nth = '1'
+    elseif label == 'Incoming Calls' then
+      nth = '1'
+    elseif label == 'Symbols' then
+      nth = '4,5'
+    end
+
     vim.list_extend(fzf_opts, {
       '-n', '1',
-      '--with-nth', '4,5',
+      '--with-nth', nth,
       '--delimiter', '\t',
       '--preview', '$HOME/.vim/plugged/fzf.vim/bin/preview.sh {1}:{2}:{3}',
       '--preview-window', "up:50%:+{2}-5:noborder",
