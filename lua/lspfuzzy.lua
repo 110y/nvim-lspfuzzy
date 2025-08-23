@@ -53,9 +53,9 @@ local function lsp_to_fzf(item)
   -- local text = opts.fzf_trim and vim.trim(item.text) or item.text
   local path = filename
   local lnum = item.lnum
-  local text = item.text:sub(item.text:find(']', 1, true) + 1):gsub('^%s+', '')
+  -- local text = item.text:sub(item.text:find(']', 1, true) + 1):gsub('^%s+', '')
 
-  return fmt('%s\t%s\t%s\t%s\t%s', path, lnum, item.col, text, item.kind)
+  return fmt('%s\t%s\t%s\t%s\t%s', path, lnum, item.col, item.text, item.kind)
 end
 
 local function fzf_to_lsp(entry)
