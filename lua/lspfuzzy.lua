@@ -140,7 +140,9 @@ local function build_fzf_opts(label, preview, multi)
     elseif label == 'Incoming Calls' then
       nth = '1'
     elseif label == 'Symbols' then
-      nth = '4,5'
+      nth = '5,4'
+    elseif label == 'Dir Symbols' then
+      nth = '5,4,1'
     end
 
     vim.list_extend(fzf_opts, {
@@ -201,9 +203,10 @@ local function symbol_handler(label, result, ctx)
     local text = item.text:sub(item.text:find(']', 1, true) + 1):gsub('^%s+', '')
 
     local symbol_name = text:match('^([^%s]+)') or text
-    local padded_text = string.format('%-' .. max_name_width .. 's', symbol_name)
+    local padded_text = string.format('%-' .. max_name_width  + 1 .. 's', symbol_name)
+    local padded_kind = string.format('%-14s', item.kind) -- the longest kind 'TypeParameter' has 13 characters: https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#textDocument_documentSymbol
 
-    return fmt('%s\t%s\t%s\t%s\t%s', path, lnum, item.col, padded_text, item.kind or '')
+    return fmt('%s\t%s\t%s\t%s\t%s\t', path, lnum, item.col, padded_kind or '', padded_text)
   end
 
   local source = vim.tbl_map(symbol_to_fzf, items)
