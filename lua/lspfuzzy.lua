@@ -137,6 +137,8 @@ local function build_fzf_opts(label, preview, multi)
 
     if label == 'References' then
       nth = '1'
+    elseif label == 'Implementations' then
+      nth = '1'
     elseif label == 'Incoming Calls' then
       nth = '1'
     elseif label == 'Symbols' then
